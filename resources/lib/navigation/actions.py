@@ -2,6 +2,8 @@
 """Navigation handler for actions"""
 from __future__ import unicode_literals
 
+import xbmc
+
 from resources.lib.globals import g
 import resources.lib.common as common
 import resources.lib.api.shakti as api
@@ -70,6 +72,15 @@ class AddonActionExecutor(object):
         api.update_my_list(videoid, operation)
         _sync_library(videoid, operation)
         common.refresh_container()
+
+    @common.inject_video_id(path_offset=1)
+    @common.time_execution(immediate=False)
+    def trailer(self, videoid):
+        """Get the trailer list"""
+        # Todo: check if trailer exists before executebuiltin
+        url = common.build_url(['supplemental', videoid.value, 'trailers'],
+                               mode=g.MODE_DIRECTORY)
+        xbmc.executebuiltin('Container.Update({})'.format(url))
 
     @common.time_execution(immediate=False)
     def purge_cache(self, pathitems=None):

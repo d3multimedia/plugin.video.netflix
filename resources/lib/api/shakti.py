@@ -10,10 +10,11 @@ import resources.lib.cache as cache
 import resources.lib.kodi.ui as ui
 
 from .data_types import (LoLoMo, VideoList, VideoListSorted, SeasonList, EpisodeList,
-                         SearchVideoList, CustomVideoList, SubgenreList)
+                         SearchVideoList, CustomVideoList, SubgenreList, TrailerVideoList)
 from .paths import (VIDEO_LIST_PARTIAL_PATHS, VIDEO_LIST_BASIC_PARTIAL_PATHS,
                     SEASONS_PARTIAL_PATHS, EPISODES_PARTIAL_PATHS, ART_PARTIAL_PATHS,
-                    GENRE_PARTIAL_PATHS, RANGE_SELECTOR, MAX_PATH_REQUEST_SIZE)
+                    GENRE_PARTIAL_PATHS, RANGE_SELECTOR, MAX_PATH_REQUEST_SIZE,
+                    TRAILER_PARTIAL_PATHS)
 from .exceptions import (InvalidVideoListTypeError, LoginFailedError, APIError,
                          NotLoggedInError, MissingCredentialsError)
 
@@ -220,6 +221,20 @@ def episodes(videoid):
     return EpisodeList(videoid, common.make_call('perpetual_path_request', callargs))
 
 
+def supplemental_video_list(videoid, supplemental_type):
+    """Retrieve a supplemental video list"""
+    if videoid.mediatype != common.VideoId.SUPPLEMENTAL:
+        raise common.InvalidVideoId('Cannot request supplemental list for {}'
+                                    .format(videoid))
+    common.debug('Requesting supplemental ({}) list for {}'
+                 .format(supplemental_type, videoid))
+    callargs = build_paths(
+        ['videos', videoid.supplementalid, supplemental_type,
+         {"from": 0, "to": 35}], TRAILER_PARTIAL_PATHS)
+    return VideoListSorted(common.make_call('path_request', callargs),
+                           'videos', videoid.supplementalid, supplemental_type)
+
+
 @common.time_execution(immediate=False)
 @cache.cache_output(g, cache.CACHE_COMMON)
 def single_info(videoid):
@@ -281,6 +296,18 @@ def rate(videoid, rating):
              'titleid': videoid.value,
              'rating': rating}})
     ui.show_notification(common.get_local_string(30127).format(rating * 2))
+
+
+@catch_api_errors
+@common.time_execution(immediate=False)
+def trailer(videoid):
+    """Get the trailer of a video on Netflix and play it"""
+    common.debug('Requesting trailer list for {}'.format(videoid))
+    return TrailerVideoList(common.make_call(
+        'path_request',
+        build_paths(
+            ['videos', videoid.value, 'trailers', {"from": 0, "to": 35}], TRAILER_PARTIAL_PATHS)),
+        videoid.value)
 
 
 @catch_api_errors

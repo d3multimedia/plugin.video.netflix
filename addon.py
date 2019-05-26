@@ -66,6 +66,8 @@ def route(pathitems):
     root_handler = pathitems[0] if pathitems else g.MODE_DIRECTORY
     if root_handler == g.MODE_PLAY:
         player.play(pathitems=pathitems[1:])
+    elif root_handler == g.MODE_PLAY_TRAILER:
+        player.play_trailer(videoid=pathitems[1:])
     elif root_handler == 'extrafanart':
         common.debug('Ignoring extrafanart invocation')
         xbmcplugin.endOfDirectory(handle=g.PLUGIN_HANDLE, succeeded=False)
