@@ -176,25 +176,6 @@ class CustomVideoList(object):
         return _check_sentinel(self.data.get(key, default))
 
 
-class TrailerVideoList(object):
-    """A trailer video list"""
-    # pylint: disable=invalid-name
-    def __init__(self, path_response, videoid):
-        common.debug('Trailer data: {}'.format(path_response))
-        self.data = path_response
-        self.trailers_data = self.data.get('videos', {}).get(videoid, {}).get('trailers', {})
-        self.videoids = _get_trailersids(self.trailers_data)
-        self.artitem = None
-        self.contained_titles = ['Trailer ' + str(i + 1) for i in range(len(self.trailers_data.keys()))]
-
-    def __getitem__(self, key):
-        return _check_sentinel(self.data.get('videos', {})[key])
-
-    def get(self, key, default=None):
-        """Pass call on to the backing dict of this TrailerVideoList."""
-        return _check_sentinel(self.data.get('videos', {}).get(key, default))
-
-
 class SeasonList(object):
     """A list of seasons. Includes tvshow art."""
     def __init__(self, videoid, path_response):
@@ -253,13 +234,6 @@ def _get_videoids(videos):
     """Return a list of VideoId objects for the videos"""
     return [common.VideoId.from_videolist_item(video)
             for video in videos.itervalues()]
-
-
-def _get_trailersids(trailers):
-    return [videos[1]
-            for index, videos in sorted({int(k): v
-                                         for k, v in trailers.iteritems()
-                                         if common.is_numeric(k)}.iteritems())]
 
 
 def _filterout_contexts(data, contexts):

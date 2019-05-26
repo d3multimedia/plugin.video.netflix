@@ -53,9 +53,6 @@ def generate_context_menu_items(videoid):
     if videoid.mediatype != common.VideoId.SUPPLEMENTAL and \
             videoid.mediatype in [common.VideoId.MOVIE, common.VideoId.SHOW]:
         items.insert(0, _ctx_item('trailer', videoid))
-        # url = common.build_url(['supplemental', videoid.value, 'trailers'],
-        #                        mode=g.MODE_DIRECTORY)
-        # items.insert(0, (common.get_local_string(30199), 'xbmc.ReplaceWindow(Videos,{})'.format(url)))
 
     if videoid.mediatype in [common.VideoId.MOVIE, common.VideoId.SHOW] \
             and g.PERSISTENT_STORAGE.get('profile_have_mylist_menu', False):
